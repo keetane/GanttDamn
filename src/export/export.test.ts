@@ -42,4 +42,23 @@ describe("データからの全体出力", () => {
     expect(s.getColumn(1).width).toBeCloseTo(c.displaySettings.titleWidth / 7);
     expect(s.getRow(4).height).toBe(c.rows[0].height * 0.75);
   });
+  it("XLSXのストリーミング読み込みで内容を復元できる", async () => {
+    const c = sampleChart();
+    const wb = await buildWorkbook(c);
+    const bytes = await wb.xlsx.writeBuffer();
+    const { default: ExcelJS } = await import("exceljs");
+    const { Readable } = await import("node:stream");
+    const reader = new ExcelJS.stream.xlsx.WorkbookReader(
+      Readable.from([Buffer.from(bytes)]),
+      { worksheets: "emit", sharedStrings: "cache", styles: "cache", hyperlinks: "ignore" },
+    );
+    const items: unknown[] = [];
+    for await (const sheet of reader) {
+      expect(sheet).toHaveProperty("name", "Timeline");
+      for await (const row of sheet) {
+        if (row.number >= 4) items.push(row.getCell(1).value);
+      }
+    }
+    expect(items).toEqual(c.rows.map(row => row.title));
+  });
 });

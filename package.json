@@ -1,9 +1,13 @@
 {
   "name": "gantt-damn",
   "version": "0.1.0",
+  "license": "MIT",
   "private": true,
   "type": "module",
   "scripts": {
+    "licenses:generate": "node scripts/generate-license-notices.mjs",
+    "licenses:check": "node scripts/generate-license-notices.mjs --check",
+    "prebuild": "npm run licenses:check",
     "dev": "vite --host 127.0.0.1 --port 4317 --strictPort",
     "build": "tsc -b && vite build",
     "preview": "vite preview --host 127.0.0.1 --port 4318 --strictPort",
