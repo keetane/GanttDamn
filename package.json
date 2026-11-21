@@ -1,0 +1,41 @@
+{
+  "name": "gantt-damn",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 4317 --strictPort",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4318 --strictPort",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "start": "node scripts/launcher.mjs",
+    "desktop:linux": "node scripts/create-desktop-launcher.mjs",
+    "test:launcher": "node --test scripts/launcher-platform.test.mjs"
+  },
+  "dependencies": {
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "zustand": "5.0.8",
+    "date-fns": "4.1.0",
+    "exceljs": "4.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.0",
+    "@types/react": "19.2.0",
+    "@types/react-dom": "19.2.0",
+    "@vitejs/plugin-react": "5.1.0",
+    "vite": "7.3.8",
+    "typescript": "5.9.3",
+    "tailwindcss": "4.1.17",
+    "@tailwindcss/vite": "4.1.17",
+    "vitest": "4.1.12",
+    "@playwright/test": "1.56.1",
+    "fake-indexeddb": "6.2.4"
+  },
+  "overrides": {
+    "exceljs": {
+      "uuid": "11.1.1"
+    }
+  }
+}

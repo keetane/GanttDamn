@@ -1,0 +1,3 @@
+#!/bin/zsh
+ROOT="${0:A:h:h:h:h}"
+exec /usr/bin/open -a Terminal "$ROOT/scripts/launch.command"

@@ -1,0 +1,29 @@
+node_modules/
+dist/
+playwright-report/
+test-results/
+.DS_Store
+*.local
+*.tsbuildinfo
+/GanttDamn.desktop
+
+# Local PJ data and exports (application configuration stays tracked)
+projects/
+project-data/
+backups/
+exports/
+*.json
+!/package.json
+!/package-lock.json
+!/tsconfig*.json
+*.xlsx
+*.png
+*.svg
+!/assets/**/*.png
+!/assets/**/*.svg
+
+# Local credentials and macOS Finder metadata
+.env
+.env.*
+!.env.example
+Icon?
