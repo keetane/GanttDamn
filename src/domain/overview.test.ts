@@ -186,3 +186,22 @@ it("PJ集約バーの移動は元の全行に反映し、Undo/Redoと範囲外�
   expect(()=>moveFollowingBars(all,all.rows[0].bars[0].id,-2)).toThrow();
   expect(all).toEqual(before);
 });
+
+it("一覧でも単独バー・マーカーは他PJを変えず、集約移動を元データに反映", () => {
+  const a = createChart(), b = createChart();
+  paint(a, {rowStart:0,rowEnd:0,colStart:0,colEnd:0},palette[0]);
+  paint(b, {rowStart:0,rowEnd:0,colStart:0,colEnd:0},palette[1]);
+  a.rows[0].milestones.push({id:crypto.randomUUID(),date:"2027-03-01",label:"mark",color:palette[0]});
+  const all = overviewChart([a,b],a);
+  const single = splitOverview(moveFollowingBars(all,all.rows[0].bars[0].id,1,"single"));
+  expect(single[0].rows[0].bars[0].startDate).toBe("2027-02-01");
+  expect(single[1].rows).toEqual(b.rows);
+  const summary = overviewChart([a,b],a,"projects");
+  const moved = splitOverview(moveFollowingBars(summary,summary.rows[0].bars[0].id,1,"single"));
+  expect(moved[0].rows[0].bars[0].startDate).toBe("2027-02-01");
+  expect(moved[1].rows).toEqual(b.rows);
+  const marker = splitOverview(moveFollowingBars(summary,summary.rows[0].milestones[0].id,1,"milestone"));
+  expect(marker[0].rows[0].milestones[0].date).toBe("2027-04-01");
+  expect(marker[0].rows[0].bars).toEqual(a.rows[0].bars);
+  expect(marker[1].rows).toEqual(b.rows);
+});

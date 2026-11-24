@@ -21,7 +21,7 @@ Editing a merged name changes the whole group. To give a row a different name, s
 | Resize rows or columns | Drag a row's bottom edge or a column heading's right edge, or use View settings |
 | Add a diamond | Select an empty cell and choose Add milestone in properties |
 
-Filling an overlapping range splits or replaces existing bars on that row. Bars outside the range are preserved. Dragging the body of a bar normally selects cells; use Damn it mode to shift schedules together.
+Filling an overlapping range splits or replaces existing bars on that row. Bars outside the range are preserved. Drag a colored cell or bar horizontally to move that bar alone. Diamond milestones can also be dragged individually. Use Shift-drag to select part of a bar, or start range selections from an empty cell; use Damn it mode to shift later schedules together. Dragging a summary bar in all project name shifts only that project’s underlying schedule.
 
 Cell appearance retains grid lines over the fill. Bar appearance uses a horizontal rectangle. Both display the same schedule data.
 

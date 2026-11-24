@@ -87,3 +87,24 @@ it("土日・営業時間外の日付線は次の稼働開始に表示", () => {
   c.timeScale = "day";
   expect(dateLineTime(c, new Date(2027, 0, 1, 18))).toBe("2027-01-04");
 });
+
+it("単独バー移動は後続バーとマーカーを保持し、衝突を拒否", () => {
+  const c = createChart();
+  paint(c, range(0), palette[0]);
+  paint(c, range(2), palette[1]);
+  const id = c.rows[0].bars[0].id;
+  const moved = moveFollowingBars(c, id, 1, "single");
+  expect(moved.rows[0].bars.map(b => b.startDate)).toEqual(["2027-02-01", "2027-03-01"]);
+  expect(() => moveFollowingBars(c, id, 2, "single")).toThrow("重なる");
+  expect(c.rows[0].bars[0].startDate).toBe("2027-01-01");
+});
+it("マーカーは単独で移動し、範囲外は拒否", () => {
+  const c = createChart("hour", "2027-01-01");
+  paint(c, range(9), palette[0]);
+  c.rows[0].milestones = [{id: uid(), date: "2027-01-01T17:00", label: "test", color: palette[0]}];
+  const id = c.rows[0].milestones[0].id;
+  const moved = moveFollowingBars(c, id, 1, "milestone");
+  expect(moved.rows[0].milestones[0].date).toBe("2027-01-04T08:00");
+  expect(moved.rows[0].bars).toEqual(c.rows[0].bars);
+  expect(() => moveFollowingBars(c, id, -10, "milestone")).toThrow("PJ期間");
+});

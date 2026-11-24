@@ -295,7 +295,7 @@ export default function Grid({
     window.addEventListener("pointerup", up, { once: true });
     window.addEventListener("pointercancel", clean, { once: true });
   };
-  const startBarMove = (e: ReactPointerEvent, id: string, rowIndex: number) => {
+  const startBarMove = (e: ReactPointerEvent, id: string, rowIndex: number, milestone = false) => {
     const x = e.clientX,
       scroll = root.current?.scrollLeft ?? 0;
     const initial = chart;
@@ -321,7 +321,7 @@ export default function Grid({
       delta = nextDelta;
       error = "";
       try {
-        plan = moveFollowingBars(initial, id, delta);
+        plan = moveFollowingBars(initial, id, delta, milestone ? "milestone" : damnMode ? "following" : "single");
         setMovePreview(plan);
       } catch (e) {
         plan = null;
@@ -353,19 +353,16 @@ export default function Grid({
           }));
         }
       });
-      const selected = result.rows[rowIndex].bars.find((b) => b.id === id)!;
-      const cells = barCells(selected, p);
-      if (cells)
-        select(
-          {
-            rowStart: rowIndex,
-            rowEnd: rowIndex,
-            colStart: cells.start,
-            colEnd: cells.end,
-          },
-          id,
-        );
-      onFeedback?.(t("以降のバーをまとめて移動しました"));
+      if (milestone) {
+        const selected = result.rows[rowIndex].milestones.find(m => m.id === id)!;
+        const index = p.findIndex(period => containsMilestone(period, selected.date));
+        if (index >= 0) select({ rowStart: rowIndex, rowEnd: rowIndex, colStart: index, colEnd: index }, undefined, id);
+      } else {
+        const selected = result.rows[rowIndex].bars.find(b => b.id === id)!;
+        const cells = barCells(selected, p);
+        if (cells) select({ rowStart: rowIndex, rowEnd: rowIndex, colStart: cells.start, colEnd: cells.end }, id);
+      }
+      onFeedback?.(t(milestone ? "マイルストーンを移動しました" : damnMode ? "以降のバーをまとめて移動しました" : "バーを移動しました"));
     };
     const cancel = () => clean();
     const key = (ev: KeyboardEvent) => {
@@ -761,7 +758,7 @@ export default function Grid({
                       width:
                         (cells.end - cells.start + 1) * d.columnWidth -
                         (isBar ? 6 : 0),
-                      cursor: damnMode ? "grab" : "pointer",
+                      cursor: "grab",
                       background: bar.color,
                       color: bar.textColor,
                       textAlign: bar.align,
@@ -771,37 +768,17 @@ export default function Grid({
                           : "none",
                     }}
                     onPointerDown={(e) => {
+                      if (e.button !== 0) return;
                       e.stopPropagation();
                       e.preventDefault();
-                      const rect =
-                        e.currentTarget.parentElement!.getBoundingClientRect();
-                      if (damnMode) {
-                        beginSelection(
-                          e,
-                          {
-                            rowStart: ri,
-                            rowEnd: ri,
-                            colStart: cells!.start,
-                            colEnd: cells!.end,
-                          },
-                          bar.id,
-                        );
-                        startBarMove(e, bar.id, ri);
+                      if (e.shiftKey && !damnMode) {
+                        const rect = e.currentTarget.parentElement!.getBoundingClientRect();
+                        const col = Math.max(cells!.start, Math.min(cells!.end, Math.floor((e.clientX - rect.left) / d.columnWidth)));
+                        drag.current = {row: ri, col, x: e.clientX, y: e.clientY};
+                        beginSelection(e, {rowStart:ri, rowEnd:ri, colStart:col, colEnd:col});
                         root.current?.focus();
                         return;
                       }
-                      drag.current = {
-                        row: ri,
-                        col: Math.max(
-                          cells!.start,
-                          Math.min(
-                            cells!.end,
-                            Math.floor((e.clientX - rect.left) / d.columnWidth),
-                          ),
-                        ),
-                        x: e.clientX,
-                        y: e.clientY,
-                      };
                       beginSelection(
                         e,
                         {
@@ -812,6 +789,7 @@ export default function Grid({
                         },
                         bar.id,
                       );
+                      startBarMove(e, bar.id, ri);
                       root.current?.focus();
                     }}
                     title={bar.label || t("バーを選択して編集")}
@@ -835,21 +813,27 @@ export default function Grid({
                 return ci < 0 ? null : (
                   <button
                     key={m.id}
+                    data-date={m.date}
                     className={`milestone ${selectedMilestone === m.id ? "milestone-selected" : ""}`}
                     style={{
                       left: (ci + 0.5) * d.columnWidth - 15,
                       color: m.color,
+                      cursor: "grab",
                     }}
                     title={m.label || t("マイルストーン")}
                     aria-label={m.label || t("マイルストーン")}
                     onPointerDown={(e) => {
+                      if (e.button !== 0) return;
                       e.stopPropagation();
+                      e.preventDefault();
                       beginSelection(
                         e,
                         { rowStart: ri, rowEnd: ri, colStart: ci, colEnd: ci },
                         undefined,
                         m.id,
                       );
+                      startBarMove(e, m.id, ri, true);
+                      root.current?.focus();
                     }}
                   >
                     ◆

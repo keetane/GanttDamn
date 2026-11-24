@@ -102,13 +102,15 @@ test("Excel形式の複数行貼り付けと直接編集", async ({ page }) => {
   await input.press("Enter");
   await expect(page.getByText("直接編集", { exact: true })).toBeVisible();
 });
-test("バーの中からドラッグして部分消去・別のバーの作成", async ({ page }) => {
+test("Shiftドラッグでバーの中を部分消去・別のバーの作成", async ({ page }) => {
   const bar = page.getByTestId("schedule-bar").nth(3);
   const r = (await bar.boundingBox())!;
   await page.mouse.move(r.x + 88 + 30, r.y + r.height / 2);
+  await page.keyboard.down("Shift");
   await page.mouse.down();
   await page.mouse.move(r.x + 2 * 88 + 30, r.y + r.height / 2, { steps: 8 });
   await page.mouse.up();
+  await page.keyboard.up("Shift");
   await page
     .getByRole("button", { name: "塗りつぶしを解除", exact: true })
     .click();
@@ -261,6 +263,7 @@ test("日付線ボタン・タイトルと列名の編集・milestone結合・�
 test("1時間・日・週・月・Qの切替、稼働設定とプロジェクト管理", async ({
   page,
 }) => {
+  await page.clock.setFixedTime(await page.evaluate(() => new Date().setHours(7, 0, 0, 0)));
   await expect(
     page.getByText("アイデアから、その先の一歩まで。", { exact: true }),
   ).toHaveCount(0);
@@ -1045,4 +1048,37 @@ test("タイトル・PJ選択・操作を2段のツールバーへ整理", async
   expect(workspace.y).toBeCloseTo(second.y + second.height, 0);
   for (const row of [top,tools]) expect(await row.evaluate(el=>el.scrollWidth <= el.clientWidth)).toBe(true);
   await page.screenshot({ path: "test-results/two-toolbars.png", fullPage: true });
+});
+
+test("通常ドラッグでバーとマイルストーンを単独移動して保存", async ({page}) => {
+  const bars = page.getByTestId("schedule-bar");
+  const first = bars.first();
+  const later = await bars.nth(1).getAttribute("data-start-date");
+  const dragOne = async (target: import("@playwright/test").Locator, delta = 1) => {
+    const box = (await target.boundingBox())!;
+    const width = (await page.locator(".grid-cell").first().boundingBox())!.width;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width / 2 + width * delta, box.y + box.height / 2, {steps: 8});
+    await page.mouse.up();
+  };
+  await dragOne(first);
+  await expect(first).toHaveAttribute("data-start-date", "2027-02-01");
+  await expect(bars.nth(1)).toHaveAttribute("data-start-date", later!);
+  const marker = page.locator(".milestone").first();
+  const before = (await marker.boundingBox())!.x;
+  await dragOne(marker, -1);
+  await expect.poll(async () => (await marker.boundingBox())!.x).toBeLessThan(before - 10);
+  await expect(marker).toHaveAttribute("data-date", "2027-11-01");
+  await page.getByRole("button", {name:"元に戻す",exact:true}).click();
+  await expect(marker).toHaveAttribute("data-date", "2027-12-01");
+  await expect(first).toHaveAttribute("data-start-date", "2027-02-01");
+  await page.getByRole("button", {name:"やり直す",exact:true}).click();
+  await expect(marker).toHaveAttribute("data-date", "2027-11-01");
+  await page.getByRole("button", {name: "保存", exact:true}).click();
+  await expect(page.getByText("保存済み", {exact:true})).toBeVisible();
+  await page.reload();
+  await expect(page.getByText("保存済み", {exact:true})).toBeVisible();
+  await expect(first).toHaveAttribute("data-start-date", "2027-02-01");
+  await expect(marker).toHaveAttribute("data-date", "2027-11-01");
 });

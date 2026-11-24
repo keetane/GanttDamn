@@ -113,6 +113,8 @@ PJ全データをバックアップしました|All project data backed up
 ダブルクリックで編集|Double-click to edit
 移動できません|Cannot move here
 編集内容が変更されたため移動を中止しました|Move cancelled because the data changed
+バーを移動しました|Moved the bar
+マイルストーンを移動しました|Moved the milestone
 以降のバーをまとめて移動しました|Moved this bar and all later bars
 タイムライングリッド|Timeline grid
 milestone列の見出し|Milestone column heading

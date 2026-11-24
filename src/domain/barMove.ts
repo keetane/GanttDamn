@@ -7,31 +7,36 @@ import {
   parseISO,
 } from "date-fns";
 import type { Chart } from "./model";
-import { barCells, periodsFor, projectRange, timeKey } from "./timeline";
+import { barCells, containsMilestone, periodsFor, projectRange, timeKey } from "./timeline";
 const stamp = (s: string) => Date.parse(timeKey(s) + ":00Z");
-/** Return an atomic move plan. Earlier bars and diamond markers retain their dates. */
+/** Return an atomic drag plan for one item or the following schedule. */
 export function moveFollowingBars(
   chart: Chart,
   barId: string,
   delta: number,
+  mode: "following" | "single" | "milestone" = "following",
+  projectId?: string,
 ): Chart {
   if (!Number.isInteger(delta)) throw new Error("セル単位で移動してください");
   if (!delta) return chart;
   if (chart.overviewMode === "projects" && chart.overviewProjects) {
-    const row = chart.rows.find((r) => r.bars.some((b) => b.id === barId));
+    const row = chart.rows.find((r) => mode === "milestone"
+      ? r.milestones.some((m) => m.id === barId) : r.bars.some((b) => b.id === barId));
     if (!row) throw new Error("移動するバーが見つかりません");
     const detailed = overviewChart(chart.overviewProjects, chart, "items");
+    if (mode === "milestone") return overviewChart(splitOverview(moveFollowingBars(detailed, barId, delta, mode)), chart, "projects");
     const anchor = detailed.rows
       .filter((r) => r.projectId === row.projectId)
       .flatMap((r) => r.bars)
       .sort((a, b) => timeKey(a.startDate).localeCompare(timeKey(b.startDate)))[0];
-    const moved = moveFollowingBars(detailed, anchor.id, delta);
+    const moved = moveFollowingBars(detailed, anchor.id, delta, "following", mode === "single" ? row.projectId : undefined);
     return overviewChart(splitOverview(moved), chart, "projects");
   }
-  const bar = chart.rows.flatMap((r) => r.bars).find((b) => b.id === barId);
+  const marker = mode === "milestone" ? chart.rows.flatMap(r => r.milestones).find(m => m.id === barId) : undefined;
+  const bar = marker ? { startDate: marker.date, endDateExclusive: marker.date } : chart.rows.flatMap((r) => r.bars).find((b) => b.id === barId);
   if (!bar) throw new Error("移動するバーが見つかりません");
   const p = periodsFor(chart),
-    cells = barCells(bar, p);
+    cells = marker ? (() => { const index = p.findIndex(v => containsMilestone(v, marker.date)); return index < 0 ? null : { start: index, end: index }; })() : barCells(bar, p);
   if (!cells || !p[cells.start + delta])
     throw new Error("PJ期間を超える移動はできません");
   const anchor = p[cells.start].startDate,
@@ -86,8 +91,9 @@ export function moveFollowingBars(
   const next = structuredClone(chart),
     range = projectRange(chart);
   next.rows.forEach((row) => {
+    if (projectId && row.projectId !== projectId) return;
     row.bars.forEach((b) => {
-      if (timeKey(b.startDate) >= timeKey(bar.startDate)) {
+      if (mode !== "milestone" && (mode === "single" ? b.id === barId : timeKey(b.startDate) >= timeKey(bar.startDate))) {
         b.startDate = shift(b.startDate, false);
         b.endDateExclusive = shift(b.endDateExclusive, true);
         if (
@@ -98,9 +104,9 @@ export function moveFollowingBars(
           throw new Error("PJ期間を超える移動はできません");
       }
     });
-    if (chart.overviewProjects) {
+    if (mode === "milestone" || (mode === "following" && chart.overviewProjects)) {
       row.milestones.forEach((m) => {
-        if (timeKey(m.date) >= timeKey(bar.startDate)) {
+        if (mode === "milestone" ? m.id === barId : timeKey(m.date) >= timeKey(bar.startDate)) {
           m.date = shift(m.date, false);
           if (
             timeKey(m.date) < timeKey(range.startDate) ||
