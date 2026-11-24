@@ -2,6 +2,8 @@
 
 These files supplement license texts present in installed npm packages.
 
+- `supplemental/fsevents-2.3.2-LICENSE.txt` and `supplemental/fsevents-2.3.3-LICENSE.txt`: exact license files from the corresponding lockfile-verified npm artifacts, https://registry.npmjs.org/fsevents/-/fsevents-2.3.2.tgz and https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz . Both have SHA-256 `2a8a5d6197bb97a018b8a190dd3ed853d750ca87c8e80c17aad41d6c6ff448e1`. They keep notice generation reproducible on Linux, where these macOS-only optional packages are not installed. Installed copies are checked against these texts when present.
+
 - `supplemental/saxes-5.0.1-LICENSE.txt`: exact upstream file, omitted from the npm artifact. Source: https://raw.githubusercontent.com/lddubeau/saxes/v5.0.1/LICENSE . SHA-256: `0fac2374380621b22e6b50451057721a9c52935b02d16d106a9f04897f061d0e`.
 - `supplemental/stackback-0.0.2-MIT.txt`: npm author attribution and declared MIT license, with the standard MIT permission/disclaimer. Source declaration: https://github.com/defunctzombie/node-stackback/blob/master/package.json . No copyright year has been inferred.
 - [ExcelJS browser notices](exceljs-browser-NOTICES.txt) and [provenance](exceljs-browser-provenance.md): notice texts for upstream code embedded in the official ExcelJS 4.4.0 browser bundle. The bundle's source map has no buffers, binary, chainsaw, or unzipper modules.

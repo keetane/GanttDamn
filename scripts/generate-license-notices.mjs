@@ -53,6 +53,21 @@ function licenseFiles(path) {
 }
 
 function materials(group) {
+  // fsevents is macOS-only; retain its reviewed notice on Linux builders too.
+  if (group.name === "fsevents" && ["2.3.2", "2.3.3"].includes(group.version)) {
+    if (group.paths.length !== 1 || group.license !== "MIT")
+      throw new Error("Recheck fsevents notice metadata");
+    const path = group.paths[0];
+    const text = read(`licenses/supplemental/fsevents-${group.version}-LICENSE.txt`);
+    if (sha(text) !== "2a8a5d6197bb97a018b8a190dd3ed853d750ca87c8e80c17aad41d6c6ff448e1")
+      throw new Error("The verified fsevents notice changed");
+    if (existsSync(join(root, path, "package.json"))) {
+      const meta = JSON.parse(read(`${path}/package.json`));
+      if (meta.version !== group.version || meta.license !== group.license || read(`${path}/LICENSE`) !== text)
+        throw new Error(`Installed fsevents notice mismatch: ${path}`);
+    }
+    return [{ source: `${path}/LICENSE`, text }];
+  }
   let parent;
   if (group.name.startsWith("@esbuild/")) parent = "esbuild";
   if (group.name.startsWith("@rollup/rollup-")) parent = "rollup";
