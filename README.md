@@ -105,6 +105,8 @@ npm start
 
 ## 開発
 
+スクラッチから再構築する場合は、[再構築指示書（instruction.md）](instruction.md)を使ってください。現行の操作仕様・データ契約・初期値・実装順序・受け入れ条件・公開方法をまとめています。
+
 React / TypeScript / Vite / Tailwind CSS / Zustand / date-fns / ExcelJSを使用しています。日付・編集ロジックは `src/domain/`、画面は `src/components/`、保存は `src/storage/`、出力は `src/export/` に分離しています。
 
 ```sh

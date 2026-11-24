@@ -105,6 +105,8 @@ The app is intended for desktop use. It does not provide effort or resource mana
 
 ## Development
 
+To rebuild the app from scratch, use the [reconstruction instructions (Japanese)](instruction.md). They cover current behavior, data contracts, defaults, implementation order, acceptance criteria, and deployment.
+
 Built with React, TypeScript, Vite, Tailwind CSS, Zustand, date-fns, and ExcelJS. Date and editing logic lives in `src/domain/`, UI components in `src/components/`, persistence in `src/storage/`, and export code in `src/export/`.
 
 ```sh
