@@ -6,6 +6,8 @@ Excelのセルを塗る感覚で、ガントチャートやロードマップを
 
 バックエンドやアカウント登録は不要です。プロジェクトはブラウザ内に保存します。
 
+**[Web版を開く](https://keetane.github.io/GanttDamn/)** — インストール不要で利用できます。アプリファイルはGitHub Pagesから読み込み、PJデータはブラウザ内に保存します。ローカル版とは保存先が異なるため、PJの移動には「全データをバックアップ」とJSONの読み込みを使ってください。
+
 ## スクリーンショット
 
 以下は説明用のサンプルデータです。
@@ -117,6 +119,12 @@ npm run preview       # ビルド結果の確認: 127.0.0.1:4318
 ブラウザテストにはGoogle Chromeが必要です。開発サーバーと同時に使う場合は、別ポートで `GANTT_TEST_PORT=4327 npm run test:e2e` を実行します。Playwright管理のChromiumを用意済みなら `PLAYWRIGHT_CHANNEL=chromium` も指定できます。
 
 PJ保管用の `projects/`・`project-data/`・`backups/`・`exports/`、依存パッケージ、ビルド・テスト結果はGit管理から除外しています。READMEの画面画像は `assets/screenshots/` で管理します。
+
+### GitHub Pages
+
+`main`へのpushで[公開ワークフロー](.github/workflows/pages.yml)が単体テスト・ライセンス確認・ビルドを実行し、`dist/`だけを配信します。Actions画面から手動実行も可能です。PJデータやローカルのバックアップは配信対象に含めません。
+
+Pages用ビルドをローカルで確認する場合は、`npm run build -- --base=/GanttDamn/`、`npm run preview -- --base=/GanttDamn/`の順に実行し、`http://127.0.0.1:4318/GanttDamn/`を開きます。ブラウザで保存・出力・通信を検証する場合は、ビルド後に `GANTT_PAGES=true npm run test:e2e -- --config playwright.network.config.ts --project network-preview`を実行します。
 
 ## 不具合報告
 

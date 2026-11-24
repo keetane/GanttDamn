@@ -25,7 +25,8 @@ export default defineConfig({
       reuseExistingServer: false,
     },
     {
-      command: "node node_modules/vite/bin/vite.js preview --host 127.0.0.1 --port 4328 --strictPort",
+      command: "node node_modules/vite/bin/vite.js preview --host 127.0.0.1 --port 4328 --strictPort" +
+        (process.env.GANTT_PAGES === "true" ? " --base=/GanttDamn/" : ""),
       url: "http://127.0.0.1:4328",
       reuseExistingServer: false,
     },

@@ -6,6 +6,8 @@ GanttDamn is a local web app for creating Gantt charts and roadmaps by coloring 
 
 No backend or account is required. Projects are stored in your browser.
 
+**[Open the web app](https://keetane.github.io/GanttDamn/)** — No installation is required. App files are served by GitHub Pages; project data stays in your browser. The web and local versions use separate storage. To move projects, use **Back up all data** and import the JSON backup.
+
 ## Screenshots
 
 These screenshots use demonstration data and show the Japanese interface. Use the **English** button in the app to switch languages.
@@ -117,6 +119,12 @@ npm run preview       # Preview the build: 127.0.0.1:4318
 Browser tests require Google Chrome. To run them alongside the development server, use a different port: `GANTT_TEST_PORT=4327 npm run test:e2e`. If you already have a Playwright-managed Chromium installation, you can also set `PLAYWRIGHT_CHANNEL=chromium`. These environment-variable command examples use shell syntax for macOS and Linux.
 
 Local project folders (`projects/`, `project-data/`, `backups/`, and `exports/`), dependencies, build output, and test results are excluded from Git. README screenshots are kept in `assets/screenshots/`.
+
+### GitHub Pages
+
+Pushes to `main` run the [deployment workflow](.github/workflows/pages.yml): unit tests, license verification, and a build. Only `dist/` is published. You can also trigger it manually from Actions. Local project data and backups are excluded from the published site.
+
+To preview the Pages build locally, run `npm run build -- --base=/GanttDamn/`, then `npm run preview -- --base=/GanttDamn/`, and open `http://127.0.0.1:4318/GanttDamn/`. After building, run `GANTT_PAGES=true npm run test:e2e -- --config playwright.network.config.ts --project network-preview` to check browser storage, exports, and network behavior.
 
 ## Reporting bugs
 

@@ -49,7 +49,7 @@ test("PJ編集・保存・全表示・入出力で外部送信を試みない", 
     }
   });
   await page.clock.setFixedTime(new Date("2027-06-15T10:00:00+09:00"));
-  await page.goto("/");
+  await page.goto(process.env.GANTT_PAGES === "true" ? "/GanttDamn/" : "/");
   await expect(page.getByText("保存済み", { exact: true })).toBeVisible();
   const selector = page.getByRole("combobox", { name: "プロジェクトを切り替え", exact: true });
   const originalId = await selector.inputValue();
